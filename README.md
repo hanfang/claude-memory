@@ -1,4 +1,4 @@
-# Claude Memory
+# Claude Memory Skill
 
 A minimal, low-friction memory system for Claude Code.
 
@@ -20,14 +20,14 @@ A skill-based memory protocol that:
 ## Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/hanfang/claude-memory/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hanfang/claude-memory-skill/main/install.sh | bash
 ```
 
 Or clone and run locally:
 
 ```bash
-git clone https://github.com/hanfang/claude-memory.git
-cd claude-memory
+git clone https://github.com/hanfang/claude-memory-skill.git
+cd claude-memory-skill
 ./install.sh
 ```
 
