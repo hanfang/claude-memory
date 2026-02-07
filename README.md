@@ -5,7 +5,7 @@
     |_|_|_|_____|_|_|_|  persistent memory for claude code
 ```
 
-A minimal, low-friction memory system for Claude Code.
+A hierarchical, agent-driven memory system for Claude Code.
 
 ## The Problem
 
@@ -13,14 +13,15 @@ Claude Code forgets everything between sessions. Built-in auto-memory exists but
 - It's opaque (Claude decides what's "meaningful")
 - Limited to 200 lines loaded at startup
 - Not tightly integrated into the agentic loop
+- No hierarchical organization (scales poorly)
 
 ## The Solution
 
-A skill-based memory protocol that:
-- Uses the filesystem (robust, inspectable, git-trackable)
-- Follows a clear behavioral protocol (when to read/write)
-- Operates silently (no confirmation prompts, no verbose logging)
-- Scales automatically (splits files when they get large)
+A skill-based memory protocol with:
+- **Hierarchical storage**: `core.md` summaries → `topics/<topic>.md` details
+- **Background agents**: Memory ops don't block the main agent
+- **Categorized entries**: No dumping ground, everything has a topic
+- **Filesystem-based**: Robust, inspectable, git-trackable
 
 ## Installation
 
@@ -44,29 +45,51 @@ cd claude-memory-skill
 ├── commands/
 │   └── mem.md             # The memory skill
 └── memory/
-    ├── me.md              # About you (fill this in)
-    ├── learnings.md       # Claude writes insights here
+    ├── core.md            # Summaries + pointers (always loaded)
+    ├── me.md              # About you (always loaded)
+    ├── topics/            # Detailed entries by topic
+    │   └── <topic>.md
     └── projects/          # Project-specific memories
+        └── <project>.md
 ```
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Main Agent                                         │
+│  - Focuses on user's task                           │
+│  - Spawns memory agent when needed                  │
+│  - Doesn't wait (background)                        │
+└─────────────────────┬───────────────────────────────┘
+                      │ spawn (background)
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│  Memory Agent                                       │
+│  - Reads core.md + relevant topics                  │
+│  - Writes to topic files                            │
+│  - Updates core.md summaries                        │
+└─────────────────────────────────────────────────────┘
+```
+
+## Commands
+
+| Command | Description | Blocking |
+|---------|-------------|----------|
+| `/mem load` | Load memory context at session start | No |
+| `/mem save <observation>` | Save a learning to appropriate topic | No |
+| `/mem recall <query>` | Retrieve relevant memories | Optional |
+| `/mem show` | Display memory structure | Yes |
+| `/mem forget <topic>` | Remove a topic or entries | Yes |
 
 ## Usage
 
 ### Automatic Behavior
 
 Once installed, Claude will:
-- Load `me.md` at every session start
-- Grep `learnings.md` when context would help
-- Write entries silently when learning something useful
-- Auto-split files when they exceed ~50 entries
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `/mem` | Invoke memory skill |
-| `/mem show` | Display current memory state |
-| `/mem search <query>` | Search memory for a term |
-| `/mem forget <topic>` | Remove entries matching topic |
+- Run `/mem load` in background at session start
+- Run `/mem save` in background when learning something useful
+- Run `/mem recall` when context would help
 
 ### Tell Claude What to Remember
 
@@ -82,47 +105,58 @@ Edit `~/.claude/memory/me.md` with facts about yourself:
 ```markdown
 # About the User
 
-- Backend engineer, Go and Python
+- AI researcher, focus on agents and RL
 - Prefer explicit code over clever abstractions
-- Use vim keybindings
-- Work on distributed systems
+- Python, PyTorch, JAX
 ```
 
 ## How It Works
 
-### Memory Format
+### Hierarchical Memory
 
-Entries are stored as atomic blocks:
-
+**core.md** (always loaded):
 ```markdown
-## Short title [YYYY-MM-DD]
-The insight in 1-3 sentences.
-Tags: keyword1, keyword2
+# Core Memory
+
+## Debugging
+Mostly async/timing issues. Prefer explicit logging.
+→ topics/debugging.md
+
+## RL Research
+PPO tuning, reward shaping experiments.
+→ topics/rl.md
 ```
 
-### Scaling
+**topics/debugging.md** (loaded on demand):
+```markdown
+## Async race condition fix [2024-01-15]
+Added explicit locks around shared state access.
 
-When `learnings.md` exceeds ~50 entries, Claude splits it into topic files:
-
-```
-~/.claude/memory/
-├── learnings.md           # Uncategorized entries
-├── learnings-debugging.md # Debugging insights
-├── learnings-patterns.md  # Code patterns
-└── ...
+## Redis timeout debugging [2024-01-10]
+Default timeout was too short for large payloads.
 ```
 
-### Retrieval
+### Write Flow
 
-No semantic search. Claude uses grep with tags/keywords for deterministic retrieval.
+1. Learn something → spawn background memory agent
+2. Agent categorizes → finds or creates topic file
+3. Agent appends entry with timestamp
+4. If significant, agent updates core.md summary
+
+### Read Flow
+
+1. Session start → agent reads core.md + me.md in background
+2. When stuck → agent follows pointers to relevant topics
+3. Returns context to main agent
 
 ## Design Principles
 
-- **Silent operation**: No "Saved to memory!" announcements
-- **Lazy loading**: Grep when needed, don't preload everything
-- **User control**: Edit files directly, use "forget" to remove entries
-- **Atomic entries**: One heading = one memory, easy to delete
-- **No magic**: Plain text files, grep-based search, fully inspectable
+- **Background ops**: Memory doesn't block the main agent
+- **Hierarchical**: Summaries in core.md, details in topics
+- **Categorized**: Every entry belongs to a topic
+- **Atomic entries**: One `##` block = one memory
+- **No semantic search**: Deterministic, grep-based retrieval
+- **User editable**: Plain markdown, edit anytime
 
 ## Uninstall
 
