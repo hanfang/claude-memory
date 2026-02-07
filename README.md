@@ -1,13 +1,16 @@
 ```
-┌─────────────────────────────────────────────────────┐
-│                                                     │
-│  ~/.claude/memory                                   │
-│  ├── core.md          claude-memory-skill          │
-│  ├── topics/          ───────────────────          │
-│  │   └── *.md         a skill is all you need      │
-│  └── me.md                                         │
-│                                                     │
-└─────────────────────────────────────────────────────┘
+╔══●══●══●══════════════════════════════════════════════╗
+║                                                       ║
+║  > tree ~/.claude/memory                              ║
+║                                                       ║
+║    ├── core.md          claude-memory-skill           ║
+║    ├── topics/          ───────────────────           ║
+║    │   └── *.md         a skill is all you need       ║
+║    └── me.md                                          ║
+║                                                       ║
+║  > _                                                  ║
+║                                                       ║
+╚═══════════════════════════════════════════════════════╝
 ```
 
 An embarrassingly simple and minimal implementation for agentic memory.
