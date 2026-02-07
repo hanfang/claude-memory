@@ -14,9 +14,11 @@ You have a persistent hierarchical memory system at `~/.claude/memory/`.
     └── <project>.md     # Project-specific knowledge
 ```
 
-## Commands
+## Agent-Initiated Actions (Automatic)
 
-### `/mem load` — Session Start
+These are NOT user commands. You (Claude) run these proactively.
+
+### `load` — Session Start
 
 Run in background at session start. Spawns a memory agent to:
 1. Read `~/.claude/memory/me.md`
@@ -36,7 +38,7 @@ Return a brief context summary for the main agent.
 """)
 ```
 
-### `/mem save <observation>` — Persist Learning
+### `save` — Persist Learning
 
 Run in background when you learn something worth keeping. Spawns a memory agent to:
 1. Categorize the observation (pick or create a topic)
@@ -65,7 +67,7 @@ Memory save task. Observation to save:
 """)
 ```
 
-### `/mem recall <query>` — Retrieve Context
+### `recall` — Retrieve Context
 
 Run when you need specific context. Can block if context is immediately needed.
 1. Grep `core.md` for relevant topics
@@ -83,6 +85,10 @@ Memory recall task. Query: "<the query>"
 4. Return entries relevant to the query
 """)
 ```
+
+## User-Initiated Commands
+
+These are commands the user can invoke.
 
 ### `/mem show` — Display State
 

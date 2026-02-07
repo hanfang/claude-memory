@@ -72,24 +72,26 @@ cd claude-memory-skill
 └─────────────────────────────────────────────────────┘
 ```
 
-## Commands
+## How It Works
 
-| Command | Description | Blocking |
-|---------|-------------|----------|
-| `/mem load` | Load memory context at session start | No |
-| `/mem save <observation>` | Save a learning to appropriate topic | No |
-| `/mem recall <query>` | Retrieve relevant memories | Optional |
-| `/mem show` | Display memory structure | Yes |
-| `/mem forget <topic>` | Remove a topic or entries | Yes |
+### Agent-Initiated (Automatic)
 
-## Usage
+These run automatically — you don't invoke them:
 
-### Automatic Behavior
+| Action | When | Blocking |
+|--------|------|----------|
+| `load` | Session start | No |
+| `save` | Claude learns something useful | No |
+| `recall` | Claude needs context | No |
 
-Once installed, Claude will:
-- Run `/mem load` in background at session start
-- Run `/mem save` in background when learning something useful
-- Run `/mem recall` when context would help
+### User-Initiated (Manual)
+
+These are for you to inspect and manage memory:
+
+| Command | Description |
+|---------|-------------|
+| `/mem show` | Display memory structure and contents |
+| `/mem forget <topic>` | Remove a topic or specific entries |
 
 ### Tell Claude What to Remember
 
@@ -109,8 +111,6 @@ Edit `~/.claude/memory/me.md` with facts about yourself:
 - Prefer explicit code over clever abstractions
 - Python, PyTorch, JAX
 ```
-
-## How It Works
 
 ### Hierarchical Memory
 
